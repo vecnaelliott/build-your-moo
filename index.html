@@ -1,96 +1,376 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <script defer src="/_vercel/insights/script.js"></script>
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/@exampledev/new.css@1.1.2/new.min.css"
-    />
-    <title>Vercel HTML Starter</title>
-    <meta
-      name="description"
-      content="High-performance HTML based website template."
-    />
+    <title>Build Your MOO — Lamumu</title>
+    <!-- Tailwind CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      .fade-in { animation: fadeIn 0.6s ease forwards; opacity: 0; }
+      @keyframes fadeIn { to { opacity: 1; } }
+    </style>
   </head>
-  <body>
-    <h1>Vercel HTML Starter</h1>
-    <p>
-      This template is a simple, but powerful single
-      <code>index.html</code> file deployed to
-      <a href="https://vercel.com">Vercel</a>. When your site is deployed, all
-      static assets (like HTML, JavaScript, CSS, images, and more) are deployed
-      globally to every
-      <a href="https://vercel.com/docs/concepts/edge-network/overview"
-        >Vercel Edge Network</a
-      >
-      region.
-    </p>
-    <h2>Simple, privacy-friendly analytics</h2>
-    <p>
-      Want to understand your visitor traffic? Vercel Analytics gives you
-      first-party, privacy-friendly traffic analytics for your HTML site. This
-      template is already configured using the following script:
-    </p>
-    <pre><code>&lt;script defer src="/_vercel/insights/script.js"&gt;&lt;/script&gt;</code></pre>
-    <p>
-      Learn more about
-      <a href="https://vercel.com/analytics">Vercel Analytics</a>.
-    </p>
-    <h2>Integrated with git</h2>
-    <p>
-      Deploying updates to your site is as simple as
-      <code>git push</code> thanks to Vercel's advanced
-      <a href="https://vercel.com/docs/concepts/git">Git Integration</a>.
-      Support for GitHub, GitLab, Bitbucket is zero-configuration, and with the
-      flexible Vercel CLI and API, you can integrate with any tool possible.
-    </p>
-    <p>
-      Learn more about
-      <a href="https://vercel.com/docs/concepts/git">Git Integration</a>.
-    </p>
-    <h2>Fast <code>gzip</code> compression</h2>
-    <p>
-      To help ensure the smallest possible file sizes for your static assets,
-      the Vercel Edge Network compresses files by default using
-      <code>gzip</code>. You can also optionally use
-      <code>brotli</code> compressesion if you prefer.
-    </p>
-    <p>
-      Learn more about
-      <a href="https://vercel.com/docs/concepts/edge-network/compression"
-        >compression</a
-      >.
-    </p>
-    <h2>Advanced routing configuration</h2>
-    <p>
-      Vercel gives you a variety of ways to configure the routing of your
-      website. For example, adding redirects, rewrites, or headers to your page.
-      While you can use <code>vercel.json</code> to define these through JSON,
-      you can also express your routing configuration as code using
-      <a href="https://vercel.com/docs/concepts/functions/edge-middleware"
-        >Vercel Edge Middleware</a
-      >.
-    </p>
-    <p>
-      Middleware runs before the
-      <a href="https://vercel.com/docs/concepts/edge-network/caching"
-        >Vercel Edge Network Cache</a
-      >, so you can configure routing exactly as your application needs. For
-      example, this template uses <code>middleware.js</code> defined in the root
-      of the repository to add additional security headers to the site:
-    </p>
-    <pre><code>referrer-policy: origin-when-cross-origin
-strict-transport-security: max-age=31536000; includeSubDomains; preload
-x-content-type-options: nosniff
-x-dns-prefetch-control: on
-x-frame-options: DENY</code></pre>
-    <p>
-      Learn more about
-      <a href="https://vercel.com/docs/concepts/functions/edge-middleware"
-        >Vercel Edge Middleware</a
-      >.
-    </p>
+  <body class="min-h-screen text-white">
+    <div id="bg" class="fixed inset-0 -z-10 bg-cover bg-center"></div>
+    <!-- Renkli overlay -->
+    <div class="fixed inset-0 -z-10 bg-gradient-to-b from-black/70 via-pink-500/10 to-blue-700/20"></div>
+
+    <!-- Header / Profile Bar -->
+    <header class="w-full max-w-6xl mx-auto px-4 pt-6">
+      <div class="flex items-center gap-4">
+        <img id="avatar" src="" alt="avatar" class="h-14 w-14 rounded-full ring-2 ring-pink-400/50 object-cover" />
+        <div class="flex-1 min-w-0">
+          <div class="text-lg font-semibold truncate" id="displayName">@username</div>
+          <div class="text-xs text-white/70">Click anywhere to build the image. Faster clicks = more tiles per click.</div>
+        </div>
+        <div class="flex items-center gap-6">
+          <div class="text-center">
+            <div class="text-xs text-white/70">Time</div>
+            <div id="timeElapsed" class="text-2xl font-bold tabular-nums">0.00s</div>
+          </div>
+          <div class="text-center">
+            <div class="text-xs text-white/70">Clicks</div>
+            <div id="clickCount" class="text-2xl font-bold tabular-nums">0</div>
+          </div>
+          <div class="text-center">
+            <div class="text-xs text-white/70">Speed</div>
+            <div id="multiplierBadge" class="text-2xl font-bold">×1</div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Game Area -->
+    <main class="w-full max-w-5xl mx-auto px-4 pb-10 pt-6 select-none">
+      <div class="grid lg:grid-cols-3 gap-6 items-stretch">
+        <div class="lg:col-span-2">
+          <div class="bg-white rounded-2xl shadow-2xl p-3">
+            <canvas id="buildCanvas" width="900" height="540" class="w-full rounded-xl bg-white"></canvas>
+          </div>
+          <div class="flex items-center justify-between mt-3 text-sm text-white/80">
+            <div class="flex items-center gap-2">
+              <span class="h-2 w-2 rounded-full bg-pink-400"></span>
+              <span>Goal: reveal the full image. Baseline: 900 tiles.</span>
+            </div>
+            <div id="progressText" class="tabular-nums">0 / 900 tiles</div>
+          </div>
+        </div>
+        <aside class="lg:col-span-1 space-y-3">
+          <div class="rounded-2xl border border-white/10 bg-black/30 p-6">
+            <h2 class="font-semibold text-lg mb-2">How scoring works</h2>
+            <ul class="text-base list-disc pl-5 space-y-1 text-white/80">
+              <li>Timer starts on your <span class="font-semibold">first click</span>.</li>
+              <li>Each click reveals random tiles. Click faster → ×2 / ×3, and if you keep it up → ×5.</li>
+              <li>Finish in: <span class="font-semibold text-red-400">0–30s = MOO FIRE</span>, <span class="font-semibold text-blue-400">30–45s = LET'S MOO</span>, <span class="font-semibold text-pink-400">45–60s = MOO HAPPY</span></li>
+              <li>Over 60s → <span class="font-semibold">MOO SAD</span></li>
+            </ul>
+          </div>
+          <div class="rounded-2xl border border-white/10 bg-black/30 p-6 text-base text-white/80">
+            <p class="font-semibold mb-1">Tip</p>
+            <p>Keep a steady high rhythm for ~3s to unlock ×5 build bursts.</p>
+          </div>
+        </aside>
+      </div>
+    </main>
+
+    <!-- Username Modal (RENKLİ) -->
+    <div id="nameModal" class="fixed inset-0 bg-gradient-to-br from-blue-900/60 via-pink-900/50 to-red-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+      <div class="rounded-2xl shadow-2xl overflow-hidden p-[2px] bg-gradient-to-br from-blue-600 via-pink-500 to-red-500">
+        <div class="bg-[#0b1020] text-white rounded-[14px]">
+          <div class="p-6 border-b border-white/10 text-center">
+            <h3 class="text-xl font-bold bg-gradient-to-r from-blue-400 via-pink-400 to-red-400 bg-clip-text text-transparent">Your X Username</h3>
+          </div>
+          <div class="p-8 flex flex-col items-center gap-4">
+            <input id="nameInput"
+                   class="w-80 border border-white/10 rounded-lg px-3 py-2 bg-white/5 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-pink-400 focus:border-pink-400 text-center"
+                   placeholder="e.g. elliottyu" autofocus />
+            <button id="startBtn"
+                    class="w-80 py-2.5 rounded-xl text-white font-medium shadow-lg hover:opacity-90
+                           bg-gradient-to-r from-blue-600 via-pink-500 to-red-500">
+              Start
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Result Popup (RENKLİ) -->
+    <div id="resultPopup" class="fixed inset-0 hidden items-center justify-center p-4">
+      <div class="absolute inset-0 bg-gradient-to-br from-blue-900/60 via-pink-900/50 to-red-900/60 backdrop-blur-sm"></div>
+      <div class="relative w-full max-w-md rounded-2xl shadow-2xl overflow-hidden p-[2px] bg-gradient-to-br from-blue-600 via-pink-500 to-red-500 fade-in">
+        <div class="bg-[#0b1020] text-white rounded-[14px]">
+          <div class="p-6 flex flex-col items-center gap-3 border-b border-white/10 text-center">
+            <img id="rAvatar" class="h-12 w-12 rounded-full object-cover ring-2 ring-pink-400/60" alt="avatar" />
+            <div class="font-semibold" id="rName">@username</div>
+          </div>
+          <div class="p-6 space-y-3">
+            <div class="text-2xl font-bold text-center" id="rBanner">MOO HAPPY</div>
+            <div class="grid grid-cols-2 gap-3 mt-2">
+              <div class="rounded-xl bg-gradient-to-br from-blue-600/90 to-blue-800/90 text-white p-3 text-center">
+                <div class="text-xs text-white/70">Time</div>
+                <div class="text-xl font-bold tabular-nums" id="rTime">0.00s</div>
+              </div>
+              <div class="rounded-xl bg-gradient-to-br from-pink-600/90 to-rose-700/90 text-white p-3 text-center">
+                <div class="text-xs text-white/70">Clicks</div>
+                <div class="text-xl font-bold tabular-nums" id="rClicks">0</div>
+              </div>
+            </div>
+            <button id="shareBtn"
+                    class="w-full mt-4 text-white py-2.5 rounded-xl hover:opacity-90
+                           bg-gradient-to-r from-blue-600 via-pink-500 to-red-500">
+              Share on X
+            </button>
+            <button id="playAgainBtn"
+                    class="w-full mt-2 text-white py-2.5 rounded-xl hover:bg-white/10
+                           border border-white/20 bg-white/5">
+              Play Again
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Floating multiplier toast -->
+    <div id="toast" class="pointer-events-none fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-5xl font-extrabold drop-shadow-[0_4px_12px_rgba(0,0,0,0.6)] hidden"></div>
+
+    <script>
+      /* ===== CONFIG ===== */
+      const BG_IMAGES = ['https://i.imgur.com/rWln5Pw.png']; // arka plan
+      const TARGET_IMAGE_URL = 'https://i.imgur.com/muDLqwr.png'; // build görseli
+      const SHARE_TEXT = `I just build my MOO the Lamumu on @cotantanax 's web based game! @lamumudotxyz 
+Build your MOO the Lamumu! You can reach on this build-your-moo.vercel.app/ `;
+
+      /* ===== State ===== */
+      const canvas = document.getElementById('buildCanvas');
+      const ctx = canvas.getContext('2d');
+      const avatar = document.getElementById('avatar');
+
+      function setAvatarFor(h) {
+        const lower = (h || '').toLowerCase();
+        const candidates = [
+          `https://unavatar.io/x/${encodeURIComponent(lower)}`,
+          `https://unavatar.io/twitter/${encodeURIComponent(lower)}`
+        ];
+        let i = 0;
+        avatar.onerror = () => {
+          if (i + 1 < candidates.length) {
+            i++;
+            avatar.src = candidates[i] + `?t=${Date.now()}`;
+          } else {
+            avatar.onerror = null;
+          }
+        };
+        avatar.src = candidates[0] + `?t=${Date.now()}`;
+      }
+
+      const displayName = document.getElementById('displayName');
+      const timeEl = document.getElementById('timeElapsed');
+      const clicksEl = document.getElementById('clickCount');
+      const multEl = document.getElementById('multiplierBadge');
+      const progressText = document.getElementById('progressText');
+      const toast = document.getElementById('toast');
+
+      const nameModal = document.getElementById('nameModal');
+      const nameInput = document.getElementById('nameInput');
+      const startBtn = document.getElementById('startBtn');
+
+      const resultPopup = document.getElementById('resultPopup');
+      const rAvatar = document.getElementById('rAvatar');
+      const rName = document.getElementById('rName');
+      const rTime = document.getElementById('rTime');
+      const rClicks = document.getElementById('rClicks');
+      const shareBtn = document.getElementById('shareBtn');
+      const playAgainBtn = document.getElementById('playAgainBtn');
+
+      const GRID_COLS = 30, GRID_ROWS = 30, TOTAL_TILES = GRID_COLS * GRID_ROWS;
+
+      let handle = '@username';
+      let img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.decoding = 'async';
+
+      let started = false, finished = false, startTime = 0, timerId = null, clicks = 0;
+      let revealedCount = 0, remaining = [], lastClicks = [], fastStreakStart = null;
+
+      (function setBackground() {
+        const pick = BG_IMAGES[Math.floor(Math.random() * BG_IMAGES.length)];
+        document.getElementById('bg').style.backgroundImage = `url('${pick}')`;
+      })();
+
+      function sanitizeHandle(v) {
+        v = (v || '').trim();
+        v = v.replace(/^https?:\/\/(x|twitter)\.com\//i, '');
+        v = v.replace(/^@+/, '');
+        v = v.split(/[\/?#]/)[0];
+        return v || 'username';
+      }
+
+      function prepareGrid() {
+        remaining = Array.from({ length: TOTAL_TILES }, (_, i) => i);
+        revealedCount = 0;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#f1f5f9';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        progressText.textContent = `${revealedCount} / ${TOTAL_TILES} tiles`;
+      }
+
+      function drawTileByIndex(idx) {
+        const col = idx % GRID_COLS;
+        const row = Math.floor(idx / GRID_ROWS);
+        const tileW = canvas.width / GRID_COLS;
+        a = img.width / GRID_COLS; b = img.height / GRID_ROWS;
+        const sx = a * col, sy = b * row, sw = a, sh = b;
+        const dx = col * tileW, dy = row * (canvas.height / GRID_ROWS);
+        ctx.drawImage(img, sx, sy, sw, sh, dx, dy, tileW, canvas.height / GRID_ROWS);
+      }
+
+      function revealTiles(k = 1) {
+        for (let i = 0; i < k; i++) {
+          if (!remaining.length) break;
+          const r = Math.floor(Math.random() * remaining.length);
+          const idx = remaining[r];
+          const last = remaining.pop();
+          if (r < remaining.length) remaining[r] = last;
+          drawTileByIndex(idx);
+          revealedCount++;
+        }
+        progressText.textContent = `${revealedCount} / ${TOTAL_TILES} tiles`;
+        if (revealedCount >= TOTAL_TILES || remaining.length === 0) finishGame();
+      }
+
+      function updateTimer() {
+        const ms = performance.now() - startTime;
+        const s = ms / 1000;
+        timeEl.textContent = `${s.toFixed(2)}s`;
+        if (!finished && s >= 60) finishGame(true);
+      }
+
+      function computeMultiplier() {
+        const n = lastClicks.length;
+        if (n < 2) return 1;
+        const recent = lastClicks.slice(-12);
+        const intervals = [];
+        for (let i = 1; i < recent.length; i++) intervals.push(recent[i] - recent[i - 1]);
+        if (!intervals.length) return 1;
+        const avg = intervals.reduce((a, b) => a + b, 0) / intervals.length;
+        const cps = 1000 / avg;
+        let mult = 1;
+        if (cps >= 3.5 && cps < 5.5) mult = 2;
+        else if (cps >= 5.5 && cps < 7.5) mult = 3;
+        else if (cps >= 7.5) {
+          if (!fastStreakStart) fastStreakStart = performance.now();
+          const streakMs = performance.now() - fastStreakStart;
+          mult = streakMs >= 3000 ? 5 : 3;
+        } else fastStreakStart = null;
+        return mult;
+      }
+
+      function showToast(mult) {
+        if (mult <= 1) return;
+        toast.textContent = `×${mult}`;
+        toast.classList.remove('hidden');
+        toast.style.opacity = 1;
+        toast.style.transform = 'translate(-50%, -60%) scale(1.0)';
+        toast.style.background = 'linear-gradient(90deg,#ef4444,#2563eb,#ec4899)';
+        toast.style.webkitTextFillColor = 'transparent';
+        toast.style.backgroundClip = 'text';
+        toast.style.webkitBackgroundClip = 'text';
+        setTimeout(() => {
+          toast.style.transition = 'all 350ms ease';
+          toast.style.opacity = 0;
+          toast.style.transform = 'translate(-50%, -75%) scale(0.9)';
+          setTimeout(() => {
+            toast.classList.add('hidden');
+            toast.style.transition = '';
+          }, 400);
+        }, 150);
+      }
+
+      function finishGame(timeout = false) {
+        if (finished) return;
+        finished = true;
+        clearInterval(timerId);
+        const totalMs = Math.min(60000, performance.now() - startTime);
+        const seconds = totalMs / 1000;
+
+        let banner = 'MOO HAPPY';
+        if (timeout || seconds > 60) banner = 'MOO SAD';
+        else if (seconds <= 30) banner = 'MOO FIRE';
+        else if (seconds <= 45) banner = "LET'S MOO";
+        else banner = 'MOO HAPPY';
+
+        setTimeout(() => {
+          rAvatar.src = avatar.src;
+          rName.textContent = `@${handle}`;
+          rTime.textContent = `${seconds.toFixed(2)}s`;
+          rClicks.textContent = clicks;
+          const rBanner = document.getElementById('rBanner');
+          rBanner.textContent = banner;
+          rBanner.className = 'text-2xl font-bold text-center'; // reset
+          if (banner === 'MOO FIRE') rBanner.classList.add('text-red-400');
+          else if (banner === "LET'S MOO") rBanner.classList.add('text-blue-400');
+          else if (banner === 'MOO HAPPY') rBanner.classList.add('text-pink-400');
+          resultPopup.classList.remove('hidden');
+          resultPopup.classList.add('flex');
+        }, 2000);
+      }
+
+      function resetGame() {
+        resultPopup.classList.add('hidden'); resultPopup.classList.remove('flex');
+        clearInterval(timerId);
+        started = true; finished = false; startTime = 0; timerId = null;
+        clicks = 0; lastClicks = []; fastStreakStart = null;
+        timeEl.textContent = '0.00s'; clicksEl.textContent = '0'; multEl.textContent = '×1';
+        prepareGrid();
+      }
+
+      function clickHandler(e) {
+        if (e.target.closest('#nameModal, #resultPopup, button, input, a')) return;
+        if (!started || finished) return;
+        const now = performance.now();
+        clicks++; clicksEl.textContent = clicks;
+        lastClicks.push(now); if (lastClicks.length > 32) lastClicks.shift();
+        if (!startTime) { startTime = now; timerId = setInterval(updateTimer, 50); }
+        const mult = computeMultiplier(); multEl.textContent = `×${mult}`; showToast(mult); revealTiles(mult);
+      }
+
+      startBtn.addEventListener('click', async () => {
+        const h = sanitizeHandle(nameInput.value);
+        handle = h; displayName.textContent = `@${h}`; setAvatarFor(h);
+        nameModal.classList.add('hidden'); started = true;
+      });
+      nameInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') startBtn.click(); });
+
+      shareBtn.addEventListener('click', () => {
+        const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(SHARE_TEXT)}`;
+        window.open(url, '_blank');
+      });
+      playAgainBtn.addEventListener('click', resetGame);
+      document.addEventListener('click', clickHandler);
+
+      function loadTarget() {
+        return new Promise((resolve, reject) => {
+          img.onload = () => resolve();
+          img.onerror = () => reject(new Error('Image failed to load'));
+          img.src = TARGET_IMAGE_URL;
+        });
+      }
+
+      (async function init() {
+        try { await loadTarget(); }
+        catch {
+          const ph = document.createElement('canvas'); ph.width = 720; ph.height = 432;
+          const pctx = ph.getContext('2d');
+          const g = pctx.createLinearGradient(0,0,720,432);
+          g.addColorStop(0,'#e2e8f0'); g.addColorStop(1,'#cbd5e1');
+          pctx.fillStyle = g; pctx.fillRect(0,0,720,432);
+          pctx.fillStyle = '#475569'; pctx.font = 'bold 40px system-ui';
+          pctx.fillText('Set TARGET_IMAGE_URL', 160, 220);
+          img = ph;
+        }
+        prepareGrid();
+      })();
+    </script>
   </body>
 </html>
